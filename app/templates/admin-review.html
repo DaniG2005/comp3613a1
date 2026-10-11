@@ -1,0 +1,73 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review Submission · Student Awards{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <a class="btn btn-link px-0 mb-3" href="{{ url_for('admin_home_view') }}">← Back to pending reviews</a>
+  <div class="mb-4">
+    <p class="text-muted mb-1">Volunteer-hour submission</p>
+    <h1 class="h3 mb-0">Review activity</h1>
+  </div>
+
+  <div class="row g-4">
+    <section class="col-xl-8" aria-labelledby="activity-details-heading">
+      <article class="card">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-4" id="activity-details-heading">Activity details</h2>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Student</p>
+              <p class="fw-semibold mb-0">{{ submission.student_name }} <span class="text-muted fw-normal">(@{{ submission.username }})</span></p>
+            </div>
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Current approved hours</p>
+              <p class="fw-semibold mb-0">{{ submission.current_approved_hours }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Activity</p>
+              <p class="fw-semibold mb-0">{{ submission.activity }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Organisation</p>
+              <p class="fw-semibold mb-0">{{ submission.organisation }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Activity date</p>
+              <p class="fw-semibold mb-0">{{ submission.activity_date.strftime("%b %d, %Y") }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="small text-muted mb-1">Hours submitted</p>
+              <p class="fw-semibold mb-0">{{ submission.hours_logged }}</p>
+            </div>
+            <div class="col-12">
+              <p class="small text-muted mb-1">Student notes</p>
+              <p class="mb-0">{{ submission.student_notes or "No notes provided." }}</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="col-xl-4" aria-labelledby="decision-heading">
+      <form class="card form-feature-card" method="post" action="{{ url_for('review_volunteer_hour', submission_id=submission.id) }}">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3" id="decision-heading">Review decision</h2>
+          {% if error_message %}
+          <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+          {% endif %}
+          <label class="form-label" for="admin_notes">Admin notes <span class="text-muted">(required to reject)</span></label>
+          <textarea class="form-control" id="admin_notes" name="admin_notes" rows="5"></textarea>
+        </div>
+        <div class="card-footer bg-transparent d-flex flex-wrap justify-content-between gap-2 p-3">
+          <button class="btn btn-outline-danger" type="submit" name="decision" value="Rejected" id="reject-submission">
+            Reject submission
+          </button>
+          <button class="btn btn-primary" type="submit" name="decision" value="Approved">
+            Approve submission
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

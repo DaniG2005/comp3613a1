@@ -1,0 +1,51 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Log Volunteer Hours{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <div class="mb-4">
+    <p class="text-muted mb-1">Share your time and make a difference</p>
+    <h1 class="h3 mb-0">Log Volunteer Hours</h1>
+  </div>
+
+  {% if error_message %}
+  <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+  {% endif %}
+
+  <div class="row">
+    <section class="col-12 col-xl-8" aria-labelledby="log-hours-heading">
+      <div class="card form-feature-card">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-4" id="log-hours-heading">Tell us about your volunteer activity</h2>
+          <form method="post" action="{{ url_for('submit_volunteer_hours') }}">
+            <div class="mb-3">
+              <label class="form-label" for="hours_logged">Hours completed</label>
+              <input class="form-control" type="number" id="hours_logged" name="hours_logged" min="1" step="1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="activity">Activity</label>
+              <input class="form-control" type="text" id="activity" name="activity" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="activity_date">Activity date</label>
+              <input class="form-control" type="date" id="activity_date" name="activity_date" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="organisation">Organisation</label>
+              <input class="form-control" type="text" id="organisation" name="organisation" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="student_notes">Notes</label>
+              <textarea class="form-control" id="student_notes" name="student_notes" rows="4"></textarea>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-outline-secondary" href="{{ url_for('user_home_view') }}">Cancel</a>
+              <button class="btn btn-primary" type="submit">Submit Hours</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

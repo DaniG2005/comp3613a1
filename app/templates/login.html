@@ -1,12 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Sign in{% endblock %}
+{% block title %}Sign in · Student Awards{% endblock %}
 
 {% block content %}
 <div class="auth-shell">
   <div class="auth-panel">
     <a class="auth-back" href="{{ url_for('index_view') }}">← Home</a>
-    <div class="brand-wordmark">FastStarter</div>
-    <p class="auth-tagline">Sign in to continue</p>
+    <div class="brand-wordmark">
+      <img class="brand-logo" src="{{ url_for('static', path='img/student-awards-mark.svg') }}" alt="">
+      Student Awards
+    </div>
+    <p class="auth-tagline">Welcome back. Your next milestone is waiting.</p>
 
     <form method="POST" action="{{ url_for('login_action_ajax') }}">
       <div class="mb-3">

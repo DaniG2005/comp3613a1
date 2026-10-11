@@ -3,7 +3,54 @@
 
 {% block subpage_content %}
 <div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Admin</h1>
-  <p class="text-muted mb-0">Admin workflow screens replace this shell in Phase 5 implement.</p>
+  <div class="mb-4">
+    <p class="text-muted mb-1">Review student activity</p>
+    <h1 class="h3 mb-0">Volunteer Hour Submissions</h1>
+  </div>
+
+  <section class="card" aria-labelledby="pending-heading">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0" id="pending-heading">Pending reviews</h2>
+        <span class="status-badge status-pending">{{ pending_submissions | length }} pending</span>
+      </div>
+      {% if pending_submissions %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">Student</th>
+              <th scope="col">Activity</th>
+              <th scope="col">Submitted</th>
+              <th scope="col">Hours</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Review action</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in pending_submissions %}
+            <tr>
+              <td>{{ submission.student_name }}<div class="small text-muted">@{{ submission.username }}</div></td>
+              <td>{{ submission.activity }}</td>
+              <td>{{ submission.submitted_at.strftime("%b %d, %Y") }}</td>
+              <td>{{ submission.hours_logged }}</td>
+              <td><span class="status-badge status-pending">Pending</span></td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-primary" href="{{ url_for('review_volunteer_hour_view', submission_id=submission.id) }}">Review</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <span class="material-symbols-outlined reward-empty-icon mb-2" aria-hidden="true">task_alt</span>
+        <h3 class="h5">All caught up</h3>
+        <p class="text-muted mb-0">There are no pending volunteer-hour submissions to review.</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
 </div>
 {% endblock %}

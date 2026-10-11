@@ -1,0 +1,46 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam linetype ortho
+skinparam actorBorderColor #1B365D
+skinparam actorFontColor #1E232D
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #1B365D
+skinparam usecaseFontColor #1E232D
+skinparam usecaseFontSize 12
+skinparam usecase<<main>> {
+  FontSize 16
+  BackgroundColor #FFFFFF
+  BorderColor #1B365D
+  FontColor #1E232D
+}
+skinparam rectangleBorderColor #1B365D
+skinparam rectangleBackgroundColor #F8FAFC
+skinparam arrowColor #1B365D
+
+actor "Student" as Student
+
+rectangle "Student Awards" {
+  left to right direction
+  usecase "Log Volunteer Hours" as Log_Volunteer_Hours <<main>>
+  usecase "Submit Hours for Review" as Submit_Hours_for_Review
+  usecase "Redeem Reward" as Redeem_Reward <<main>>
+  usecase "Check Reward Balance" as Check_Reward_Balance
+  usecase "View Available Rewards" as View_Available_Rewards
+  usecase "View Pending Submissions" as View_Pending_Submissions
+  usecase "Update Student Balance" as Update_Student_Balance
+  usecase "Review and Approve Volunteer Hours" as Review_and_Approve_Volunteer_Hours <<main>>
+}
+
+actor "Admin" as Admin
+
+Student --> Log_Volunteer_Hours
+Log_Volunteer_Hours ..> Submit_Hours_for_Review : <<include>>
+Review_and_Approve_Volunteer_Hours <-- Admin
+Review_and_Approve_Volunteer_Hours ..> View_Pending_Submissions : <<include>>
+Review_and_Approve_Volunteer_Hours ..> Update_Student_Balance : <<include>>
+Student --> Redeem_Reward
+Redeem_Reward ..> Check_Reward_Balance : <<include>>
+Redeem_Reward ..> View_Available_Rewards : <<include>>
+
+@enduml

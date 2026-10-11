@@ -3,7 +3,151 @@
 
 {% block subpage_content %}
 <div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Home</h1>
-  <p class="text-muted mb-0">Workflow screens replace this shell in Phase 5 implement.</p>
+  <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+    <div>
+      <p class="dashboard-eyebrow mb-2">Your volunteer journey</p>
+      <h1 class="dashboard-title mb-0">Welcome, {{ user.username }}</h1>
+    </div>
+  </div>
+
+  {% if summary.milestones %}
+  {% set progress = namespace(next_milestone=none) %}
+  {% for milestone in summary.milestones %}
+    {% if not milestone.unlocked and progress.next_milestone is none %}
+      {% set progress.next_milestone = milestone %}
+    {% endif %}
+  {% endfor %}
+  <section class="progress-spotlight mb-4" aria-labelledby="progress-spotlight-heading">
+    <div>
+      <p class="progress-spotlight-kicker mb-2">
+        <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+        Your next step
+      </p>
+      {% if progress.next_milestone %}
+      <h2 class="progress-spotlight-title mb-1" id="progress-spotlight-heading">{{ progress.next_milestone.name }}</h2>
+      <p class="progress-spotlight-detail mb-0">
+        {{ progress.next_milestone.hours_remaining }} more approved
+        {{ 'hour' if progress.next_milestone.hours_remaining == 1 else 'hours' }} to reach your next milestone.
+      </p>
+      {% else %}
+      <h2 class="progress-spotlight-title mb-1" id="progress-spotlight-heading">Every milestone unlocked!</h2>
+      <p class="progress-spotlight-detail mb-0">Thank you for showing up for your community.</p>
+      {% endif %}
+    </div>
+    {% if progress.next_milestone %}
+    <div>
+      <div class="d-flex justify-content-between align-items-end gap-3 mb-2">
+        <span class="progress-spotlight-label">Progress to {{ progress.next_milestone.required_hours }} hours</span>
+        <span class="progress-spotlight-value">{{ progress.next_milestone.progress_percent }}%</span>
+      </div>
+      <div class="progress progress-spotlight-track" role="progressbar"
+           aria-label="Progress toward {{ progress.next_milestone.name }}"
+           aria-valuenow="{{ progress.next_milestone.progress_percent }}"
+           aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: {{ progress.next_milestone.progress_percent }}%"></div>
+      </div>
+    </div>
+    {% else %}
+    <span class="material-symbols-outlined progress-spotlight-trophy" aria-hidden="true">emoji_events</span>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100 dashboard-stat-card"><div class="card-body">
+        <span class="material-symbols-outlined dashboard-stat-icon" aria-hidden="true">volunteer_activism</span>
+        <p class="text-muted mb-1">Total hours</p>
+        <p class="display-6 mb-0">{{ summary.total_hours }}</p>
+      </div></div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100 dashboard-stat-card dashboard-stat-rewards"><div class="card-body">
+        <span class="material-symbols-outlined dashboard-stat-icon" aria-hidden="true">redeem</span>
+        <p class="text-muted mb-1">Rewards balance</p>
+        <p class="display-6 mb-0">{{ summary.rewards_balance }}</p>
+        <p class="small text-muted mb-0">volunteer hours available</p>
+      </div></div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100 dashboard-stat-card dashboard-stat-rank"><div class="card-body">
+        <span class="material-symbols-outlined dashboard-stat-icon" aria-hidden="true">leaderboard</span>
+        <p class="text-muted mb-1">Leaderboard rank</p>
+        <p class="display-6 mb-0">#{{ summary.leaderboard_rank }}</p>
+      </div></div>
+    </div>
+  </div>
+
+  <section class="mb-4" aria-labelledby="milestones-heading">
+    <div class="d-flex align-items-end justify-content-between gap-3 mb-3">
+      <div>
+        <p class="text-muted mb-1">Keep climbing</p>
+        <h2 class="h5 mb-0" id="milestones-heading">Your milestones</h2>
+      </div>
+    </div>
+    <div class="row g-3">
+      {% for milestone in summary.milestones %}
+      <div class="col-md-4">
+        <article class="card h-100 milestone-card milestone-tier-{{ loop.index0 }} {{ 'milestone-card-unlocked' if milestone.unlocked }}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <p class="small text-muted mb-1">{{ milestone.required_hours }} approved hours</p>
+                <h3 class="h6 mb-0">{{ milestone.name }}</h3>
+              </div>
+              <span class="material-symbols-outlined milestone-icon" aria-hidden="true">
+                {{ 'workspace_premium' if milestone.name == 'Bronze Badge' else ('coffee' if milestone.name == 'Department Mug' else 'checkroom') }}
+              </span>
+            </div>
+            <div class="progress" role="progressbar"
+                 aria-label="{{ milestone.name }} progress"
+                 aria-valuenow="{{ milestone.progress_percent }}"
+                 aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" style="width: {{ milestone.progress_percent }}%"></div>
+            </div>
+            <p class="small text-muted mt-2 mb-0">
+              {% if milestone.unlocked %}
+              <span class="status-badge status-completed">Completed</span>
+              {% else %}
+              <span class="status-badge status-locked">Locked</span>
+              {{ milestone.hours_remaining }} more approved {{ 'hour' if milestone.hours_remaining == 1 else 'hours' }} to go
+              {% endif %}
+            </p>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="mb-4" aria-labelledby="submission-heading">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h5" id="submission-heading">Recent submissions</h2>
+        {% if submissions %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead><tr><th scope="col">Activity</th><th scope="col">Date</th><th scope="col">Hours</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              {% for submission in submissions %}
+              <tr>
+                <td>{{ submission.activity }}<div class="small text-muted">{{ submission.organisation }}</div></td>
+                <td>{{ submission.activity_date.strftime("%b %d, %Y") }}</td>
+                <td>{{ submission.hours_logged }}</td>
+                <td><span class="status-badge status-{{ submission.status | lower }}">{{ submission.status }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <span class="material-symbols-outlined reward-empty-icon" aria-hidden="true">volunteer_activism</span>
+          <p class="mb-0">No volunteer hours logged yet. Your first entry is a great place to start.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
 </div>
 {% endblock %}

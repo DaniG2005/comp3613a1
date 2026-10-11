@@ -240,14 +240,21 @@ async def config_reinit_db_action(
         if drop:
             drop_all()
         ensure_db_and_tables()
-        created = skipped = 0
+        seeded = None
         if seed:
-            created, skipped = _seed_demo_users()
+            from app.utilities.demo_data import seed_demo_data
+
+            seeded = seed_demo_data()
         msg = "Database reinitialized"
         if drop:
             msg += " (tables dropped)"
-        if seed:
-            msg += f"; seed created={created} skipped={skipped}"
+        if seeded is not None:
+            msg += (
+                f"; seed created={seeded.users_created} users, "
+                f"skipped={seeded.users_skipped}, "
+                f"added={seeded.submissions_created} submissions, "
+                f"claims={seeded.redemptions_created}"
+            )
         flash(request, msg, "success")
     except Exception as exc:  # noqa: BLE001
         flash(request, f"DB reinit failed: {exc}", "danger")
@@ -265,10 +272,16 @@ async def config_seed_action(request: Request):
         return gate
     try:
         ensure_db_and_tables()
-        created, skipped = _seed_demo_users()
+        from app.utilities.demo_data import seed_demo_data
+
+        seeded = seed_demo_data()
         flash(
             request,
-            f"Seed done — created {created}, skipped {skipped}",
+            "Seed done — "
+            f"created {seeded.users_created} users, "
+            f"skipped {seeded.users_skipped}, "
+            f"added {seeded.submissions_created} submissions and "
+            f"{seeded.redemptions_created} reward claims",
             "success",
         )
     except Exception as exc:  # noqa: BLE001
@@ -369,33 +382,3 @@ async def config_clear_cache_action(request: Request):
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
-
-def _seed_demo_users() -> tuple[int, int]:
-    from app.database import get_cli_session
-    from app.repositories.user import UserRepository
-    from app.schemas.user import AdminCreate, RegularUserCreate
-    from app.utilities.security import encrypt_password
-
-    demo_users = [
-        ("bob", "bob@example.com", "bobpass", "regular_user"),
-        ("admin", "admin@example.com", "adminpass", "admin"),
-    ]
-    created = 0
-    skipped = 0
-    with get_cli_session() as session:
-        repo = UserRepository(session)
-        for username, email, password, role in demo_users:
-            if repo.get_by_username(username):
-                skipped += 1
-                continue
-            payload_cls = AdminCreate if role == "admin" else RegularUserCreate
-            repo.create(
-                payload_cls(
-                    username=username,
-                    email=email,
-                    password=encrypt_password(password),
-                    role=role,
-                )
-            )
-            created += 1
-    return created, skipped

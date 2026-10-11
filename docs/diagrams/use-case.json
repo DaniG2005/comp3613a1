@@ -1,0 +1,29 @@
+{
+  "system": "Student Awards",
+  "actors": [
+    {"name": "Student", "side": "left"},
+    {"name": "Admin", "side": "right"}
+  ],
+  "use_cases": [
+    {
+      "name": "Log Volunteer Hours",
+      "actors": ["Student"],
+      "includes": ["Submit Hours for Review"]
+    },
+    {"name": "Submit Hours for Review"},
+    {
+      "name": "Review and Approve Volunteer Hours",
+      "actors": ["Admin"],
+      "includes": ["View Pending Submissions", "Update Student Balance"]
+    },
+    {"name": "View Pending Submissions"},
+    {"name": "Update Student Balance"},
+    {
+      "name": "Redeem Reward",
+      "actors": ["Student"],
+      "includes": ["Check Reward Balance", "View Available Rewards"]
+    },
+    {"name": "Check Reward Balance"},
+    {"name": "View Available Rewards"}
+  ]
+}

@@ -130,16 +130,25 @@ def to_plantuml(spec: DiagramSpec) -> str:
         "@startuml",
         "!pragma layout smetana",
         "skinparam shadowing false",
+        "skinparam linetype ortho",
         "skinparam actorBorderColor #1B365D",
         "skinparam actorFontColor #1E232D",
         "skinparam usecaseBackgroundColor #FFFFFF",
         "skinparam usecaseBorderColor #1B365D",
         "skinparam usecaseFontColor #1E232D",
+        "skinparam usecaseFontSize 12",
+        "skinparam usecase<<main>> {",
+        "  FontSize 16",
+        "  BackgroundColor #FFFFFF",
+        "  BorderColor #1B365D",
+        "  FontColor #1E232D",
+        "}",
         "skinparam rectangleBorderColor #1B365D",
         "skinparam rectangleBackgroundColor #F8FAFC",
         "skinparam arrowColor #1B365D",
         "",
     ]
+
     left = [actor for actor in spec.actors if actor.side != "right"]
     right = [actor for actor in spec.actors if actor.side == "right"]
     for actor in left:
@@ -148,12 +157,17 @@ def to_plantuml(spec: DiagramSpec) -> str:
         )
     if left:
         lines.append("")
+
+    ordered_cases = _ordered_cases(spec)
     lines.append(f"rectangle {_quote(spec.system)} {{")
-    for case in spec.use_cases:
+    lines.append("  left to right direction")
+    for case in ordered_cases:
+        main_suffix = " <<main>>" if _is_main_case(case.name) else ""
         lines.append(
-            f"  usecase {_quote(case.name)} as {aliases[f'uc:{case.name}']}"
+            f"  usecase {_quote(case.name)} as {aliases[f'uc:{case.name}']}{main_suffix}"
         )
     lines.append("}")
+
     if right:
         lines.append("")
     for actor in right:
@@ -283,6 +297,54 @@ def _parse_relations(raw: object) -> list[tuple[str, str]]:
 def _quote(text: str) -> str:
     escaped = text.replace("\\", "\\\\").replace('"', '\\"')
     return f'"{escaped}"'
+
+
+def _is_main_case(name: str) -> bool:
+    normalized = name.strip().lower()
+    return normalized in {
+        "log volunteer hours",
+        "review and approve volunteer hours",
+        "redeem reward",
+    }
+
+
+def _ordered_cases(spec: DiagramSpec) -> tuple[UseCase, ...]:
+    by_name = {case.name: case for case in spec.use_cases}
+    ordered: list[UseCase] = []
+    seen: set[str] = set()
+
+    def add_case(name: str) -> None:
+        if name in seen:
+            return
+        case = by_name.get(name)
+        if case is not None:
+            ordered.append(case)
+            seen.add(name)
+
+    student_group = [
+        "Log Volunteer Hours",
+        "Submit Hours for Review",
+        "Redeem Reward",
+        "Check Reward Balance",
+        "View Available Rewards",
+    ]
+    for name in student_group:
+        add_case(name)
+
+    admin_group = [
+        "View Pending Submissions",
+        "Update Student Balance",
+        "Review and Approve Volunteer Hours",
+    ]
+    for name in admin_group:
+        add_case(name)
+
+    for case in spec.use_cases:
+        if case.name not in seen:
+            ordered.append(case)
+            seen.add(case.name)
+
+    return tuple(ordered)
 
 
 def _alias(prefix: str, name: str, used: set[str]) -> str:

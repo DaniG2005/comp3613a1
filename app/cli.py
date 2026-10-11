@@ -23,7 +23,7 @@ def _ensure_models_loaded() -> None:
 
 
 def cmd_init(args: argparse.Namespace) -> None:
-    """Create database tables (drops existing by default) and seed demo users."""
+    """Create database tables (drops existing by default) and seed demo data."""
     from app.config import get_settings
     from app.database import drop_all, ensure_db_and_tables
 
@@ -47,47 +47,19 @@ def cmd_init(args: argparse.Namespace) -> None:
 
 
 def cmd_seed(args: argparse.Namespace) -> None:
-    """Insert demo users.
+    """Insert demo accounts and Student Awards sample records."""
+    from app.utilities.demo_data import seed_demo_data
 
-    bob / bobpass       (regular_user)
-    admin / adminpass   (admin)
-    """
-    from app.database import ensure_db_and_tables, get_cli_session
-    from app.repositories.user import UserRepository
-    from app.schemas.user import AdminCreate, RegularUserCreate
-    from app.utilities.security import encrypt_password
-
-    _ensure_models_loaded()
-    ensure_db_and_tables()
-
-    demo_users = [
-        ("bob", "bob@example.com", "bobpass", "regular_user"),
-        ("admin", "admin@example.com", "adminpass", "admin"),
-    ]
-
-    created = 0
-    skipped = 0
-    with get_cli_session() as session:
-        repo = UserRepository(session)
-        for username, email, password, role in demo_users:
-            if repo.get_by_username(username):
-                print(f"  skip  {username} (already exists)")
-                skipped += 1
-                continue
-            payload_cls = AdminCreate if role == "admin" else RegularUserCreate
-            repo.create(
-                payload_cls(
-                    username=username,
-                    email=email,
-                    password=encrypt_password(password),
-                    role=role,
-                )
-            )
-            print(f"  create {username} ({role})")
-            created += 1
-
-    print(f"Seed done — created {created}, skipped {skipped}.")
-    print("Login with bob/bobpass or admin/adminpass")
+    summary = seed_demo_data()
+    print(
+        "Seed complete - "
+        f"created {summary.users_created} users, skipped {summary.users_skipped}, "
+        f"added {summary.submissions_created} submissions and "
+        f"{summary.redemptions_created} reward claims."
+    )
+    print("Student logins: bob/bobpass, maya/studentpass, jordan/studentpass,")
+    print("                alex/studentpass, taylor/studentpass")
+    print("Admin login:    admin/adminpass")
 
 
 def cmd_run(args: argparse.Namespace) -> None:
@@ -221,7 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_init = sub.add_parser(
         "init",
-        help="Create DB tables and seed demo users (drops existing tables by default)",
+        help="Create DB tables and seed demo data (drops existing tables by default)",
     )
     p_init.add_argument(
         "--no-drop",
@@ -233,13 +205,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-seed",
         dest="seed",
         action="store_false",
-        help="Skip demo user seed after creating tables",
+        help="Skip demo data seed after creating tables",
     )
     p_init.set_defaults(drop=True, seed=True, func=cmd_init)
 
     p_seed = sub.add_parser(
         "seed",
-        help="Insert demo users only (idempotent; also runs as part of init)",
+        help="Insert demo accounts and sample award data (idempotent; also part of init)",
     )
     p_seed.set_defaults(func=cmd_seed)
 

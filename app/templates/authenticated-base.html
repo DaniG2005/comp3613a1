@@ -2,11 +2,6 @@
 
 {% block internal_css %}
 <style>
-    body {
-        overflow-x: hidden;
-        background: #f4f6f8;
-    }
-
     #wrapper {
         display: flex;
         min-height: 100vh;
@@ -17,28 +12,13 @@
         max-width: 250px;
         min-height: 100vh;
         transition: all 0.3s;
-        background: var(--brand-sidebar);
-        color: #fff;
     }
 
     #sidebar.collapsed {
         margin-left: -250px;
     }
 
-    #sidebar .nav-link {
-        color: var(--brand-sidebar-text);
-        font-weight: 500;
-    }
-
-    #sidebar .nav-link:hover,
-    #sidebar .nav-link.active {
-        color: #fff;
-        background-color: color-mix(in srgb, var(--brand-accent) 55%, #000);
-        border-radius: 0.5rem;
-    }
-
     #sidebar .brand-wordmark {
-        color: #fff;
         font-size: 1.25rem;
         text-align: center;
         margin: 1rem 0 1.5rem;
@@ -50,11 +30,6 @@
         transition: all 0.3s;
         display: flex;
         flex-direction: column;
-        background-color: #f4f6f8;
-    }
-
-    .navbar {
-        border-bottom: 1px solid #dee2e6;
     }
 </style>
 {% block additional_styles %}{% endblock %}
@@ -62,17 +37,51 @@
 
 {% block content %}
 <div id="wrapper">
-    <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <div class="brand-wordmark">FastStarter</div>
+    <nav id="sidebar" class="p-3 d-flex flex-column">
+        <a class="brand-wordmark text-decoration-none" href="{{ url_for('index_view') }}">
+            <img class="brand-logo" src="{{ url_for('static', path='img/student-awards-mark.svg') }}" alt="">
+            Student Awards
+        </a>
 
         <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
+            {% if user.role == "admin" %}
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app') }}"
-                   href="{{ url_for('user_home_view') }}">
-                    <span class="material-symbols-outlined me-2">home</span>
-                    Home
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/admin' or request.url.path.startswith('/admin/volunteer-hours/') }}"
+                   href="{{ url_for('admin_home_view') }}">
+                    <span class="material-symbols-outlined me-2">space_dashboard</span>
+                    Volunteer hours
                 </a>
             </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app' }}"
+                   href="{{ url_for('user_home_view') }}">
+                    <span class="material-symbols-outlined me-2">space_dashboard</span>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app/log-hours' }}"
+                   href="{{ url_for('log_hours_view') }}">
+                    <span class="material-symbols-outlined me-2">volunteer_activism</span>
+                    Log Hours
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app/rewards' }}"
+                   href="{{ url_for('rewards_view') }}">
+                    <span class="material-symbols-outlined me-2">redeem</span>
+                    Rewards
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app/leaderboard' }}"
+                   href="{{ url_for('leaderboard_view') }}">
+                    <span class="material-symbols-outlined me-2">leaderboard</span>
+                    Leaderboards
+                </a>
+            </li>
+            {% endif %}
             <li class="nav-item mt-auto">
                 <a class="nav-link d-flex align-items-center text-danger" href="{{ url_for('logout') }}">
                     <span class="material-symbols-outlined me-2">logout</span>
@@ -83,7 +92,7 @@
     </nav>
 
     <div id="content">
-        <nav class="navbar navbar-expand-lg bg-white mb-4 px-3 rounded-3 shadow-sm">
+        <nav class="navbar navbar-expand-lg mb-4 px-3 rounded-3 shadow-sm">
             <button class="btn btn-outline-secondary" id="menu-toggle" type="button">
                 <span class="material-symbols-outlined md-dark">menu</span>
             </button>
