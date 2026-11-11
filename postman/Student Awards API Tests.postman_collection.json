@@ -1,0 +1,282 @@
+{
+  "info": {
+    "_postman_id": "f2c87205-1237-4cee-aa9d-56573affebbe",
+    "name": "Student Awards API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52609105",
+    "_collection_link": "https://go.postman.co/collection/52609105-f2c87205-1237-4cee-aa9d-56573affebbe?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - Login User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n\r\npm.test(\"Login is successful\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.message).to.eql(\"Login successful\");\r\n});\r\n\r\n\r\npm.test(\"Correct student logged in\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.username).to.eql(\"bob\");\r\n});\r\n\r\n\r\npm.test(\"User has student role\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.role).to.eql(\"regular_user\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"bob\",\r\n    \"password\": \"bobpass\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Get Student Volunteer Hours",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n\r\npm.test(\"Response is JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\n\r\npm.test(\"Volunteer hours are returned\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json).to.be.an(\"array\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/volunteer-hours",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "volunteer-hours"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Submit Volunteer Hours",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Submission is pending\", function () {\n    pm.expect(json.status).to.eql(\"Pending\");\n});\n\npm.test(\"Correct number of hours submitted\", function () {\n    pm.expect(json.hours_logged).to.eql(5);\n});\n\npm.test(\"Correct activity was submitted\", function () {\n    pm.expect(json.activity).to.eql(\"Food Drive\");\n});\n\npm.test(\"Submission has an ID\", function () {\n    pm.expect(json.id).to.exist;\n});\n\nconsole.log(\"Submission ID:\", json.id);\n\nif (json.id) {\n    pm.collectionVariables.set(\n        \"submission_id\",\n        String(json.id)\n    );\n}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"hours_logged\": 5,\r\n    \"activity\": \"Food Drive\",\r\n    \"activity_date\": \"2026-11-09\",\r\n    \"organisation\": \"UWI\",\r\n    \"student_notes\": \"Helped distribute food.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/volunteer-hours",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "volunteer-hours"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04- Admin Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n\r\npm.test(\"Login is successful\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.message).to.eql(\"Login successful\");\r\n});\r\n\r\n\r\npm.test(\"Correct admin logged in\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.username).to.eql(\"admin\");\r\n});\r\n\r\n\r\npm.test(\"User has admin role\", function () {\r\n    const json = pm.response.json();\r\n\r\n    pm.expect(json.role).to.eql(\"admin\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"adminpass\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Approve Volunteer hours",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"decision\": \"Approved\",\r\n    \"admin_notes\": \"Verified.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/volunteer-hours/{{submission_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "volunteer-hours",
+            "{{submission_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Student Login Again",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"bob\",\r\n    \"password\": \"bobpass\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Get Available Rewards",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Rewards balance is returned\", function () {\r\n    pm.expect(json.rewards_balance).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"Available rewards are returned\", function () {\r\n    pm.expect(json.available_rewards).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Bronze Badge is available\", function () {\r\n    const bronze = json.available_rewards.find(\r\n        reward => reward.name === \"Bronze Badge\"\r\n    );\r\n\r\n    pm.expect(bronze).to.exist;\r\n});\r\n\r\nconst bronze = json.available_rewards.find(\r\n    reward => reward.name === \"Bronze Badge\"\r\n);\r\n\r\nif (bronze) {\r\n    pm.collectionVariables.set(\r\n        \"reward_id\",\r\n        String(bronze.id)\r\n    );\r\n\r\n    console.log(\"Reward ID:\", bronze.id);\r\n}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/rewards",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "rewards"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Redeem Reward",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"reward_id\": {{reward_id}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/reward-redemptions",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "reward-redemptions"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "submission_id",
+      "value": ""
+    },
+    {
+      "key": "reward_id",
+      "value": ""
+    }
+  ]
+}
